@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>泰瑞倉頡－線上查碼</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>泰瑞倉頡－線上查碼</h1>
+  <p class="subtitle">支援 CJK URO 及 Extension A～J 及部分日文假名及符號</p>
+
+  <div class="card">
+    <div class="input-group">
+      <input type="text" id="charInput" placeholder="請輸入漢字" autocomplete="off">
+      <button id="searchBtn" disabled>查碼</button>
+    </div>
+
+    <div id="status" class="status">正在載入碼表，約需3至30秒，請靜候載入完成...</div>
+
+    <div id="result" class="result">
+      <div class="char-display" id="charDisplay"></div>
+      <div class="code-list" id="codeList"></div>
+    </div>
+  </div>
+
+  <footer>資料來源：<a href="https://terryjiun.github.io/posts/Terry-Yong-CJK-Extension-I/" target="_blank">泰瑞版小小輸入法－倉頡碼表</a>（2026年6月24日版本）</footer>
+
+  <script>
+    // 倉頡字母對照表
+    const radicalMap = {
+      a: "日", b: "月", c: "金", d: "木", e: "水",
+      f: "火", g: "土", h: "竹", i: "戈", j: "十",
+      k: "大", l: "中", m: "一", n: "弓", o: "人",
+      p: "心", q: "手", r: "口", s: "尸", t: "廿",
+      u: "山", v: "女", w: "田", x: "難", y: "卜",
+      z: "重"
+    };
+
+    // 字元 → 編碼陣列
+    let codeMap = new Map();
+
+    // 把英文字母編碼轉成倉頡字母
+    function toCangjie(code) {
+      return code
+        .toLowerCase()
+        .split("")
+        .map(c => radicalMap[c] || c)
+        .join("");
+    }
+
+    // 正確取出「一個 Unicode 字元」（支援代理對）
+    function getFirstChar(str) {
+      const chars = [...str];
+      return chars.length > 0 ? chars[0] : "";
+    }
+
+    // 強制只保留最後一個完整的 Unicode 字元
+    function forceSingleChar() {
+      const inputEl = document.getElementById("charInput");
+      const chars = [...inputEl.value];
+      if (chars.length > 1) {
+        inputEl.value = chars[chars.length - 1];
+      }
+    }
+
+    // 取得 Unicode 碼位（支援輔助平面）
+    function getCodePoint(char) {
+      return char.codePointAt(0);
+    }
+
+    // 判斷所屬字元集（Unicode Block）
+    function getUnicodeBlock(codePoint) {
+      if (codePoint >= 0x4E00 && codePoint <= 0x9FFF) return "CJK 基本區";
+      if (codePoint >= 0x3400 && codePoint <= 0x4DBF) return "CJK Extension A";
+      if (codePoint >= 0x20000 && codePoint <= 0x2A6DF) return "CJK Extension B";
+      if (codePoint >= 0x2A700 && codePoint <= 0x2B73F) return "CJK Extension C";
+      if (codePoint >= 0x2B740 && codePoint <= 0x2B81F) return "CJK Extension D";
+      if (codePoint >= 0x2B820 && codePoint <= 0x2CEAF) return "CJK Extension E";
+      if (codePoint >= 0x2CEB0 && codePoint <= 0x2EBEF) return "CJK Extension F";
+      if (codePoint >= 0x30000 && codePoint <= 0x3134F) return "CJK Extension G";
+      if (codePoint >= 0x31350 && codePoint <= 0x323AF) return "CJK Extension H";
+      if (codePoint >= 0x2EBF0 && codePoint <= 0x2EE5F) return "CJK Extension I";
+      if (codePoint >= 0x323B0 && codePoint <= 0x3347F) return "CJK Extension J";
+      if (codePoint >= 0xF900 && codePoint <= 0xFAFF) return "CJK 相容漢字";
+      if (codePoint >= 0x2F800 && codePoint <= 0x2FA1F) return "CJK 相容漢字補充";
+      return "其他字元集";
+    }
+
+    // 載入並解析 Chajei.txt
+    async function loadCodeTable() {
+      try {
+        const response = await fetch("./Chajei.txt");
+        if (!response.ok) throw new Error("無法載入 Chajei.txt");
+
+        const text = await response.text();
+        const lines = text.split(/\r?\n/);
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith("##")) continue;
+
+          const parts = trimmed.split(/\s+/);
+          if (parts.length < 2) continue;
+
+          const code = parts[0].toLowerCase();
+          const char = parts[1];
+
+          if (!codeMap.has(char)) {
+            codeMap.set(char, []);
+          }
+          if (!codeMap.get(char).includes(code)) {
+            codeMap.get(char).push(code);
+          }
+        }
+
+        document.getElementById("status").textContent = `碼表載入完成（共 ${codeMap.size} 個字）`;
+        document.getElementById("searchBtn").disabled = false;
+      } catch (err) {
+        document.getElementById("status").textContent = "載入碼表失敗：" + err.message;
+        console.error(err);
+      }
+    }
+
+    // 執行查詢
+    function search() {
+      const input = document.getElementById("charInput");
+      const raw = input.value.trim();
+      const char = getFirstChar(raw);
+
+      const resultEl = document.getElementById("result");
+      const charDisplay = document.getElementById("charDisplay");
+      const codeList = document.getElementById("codeList");
+      const status = document.getElementById("status");
+
+      codeList.innerHTML = "";
+      resultEl.classList.remove("show");
+
+      // 清除舊的 Unicode 資訊
+      const oldUnicodeInfo = document.getElementById("unicodeInfo");
+      if (oldUnicodeInfo) {
+        oldUnicodeInfo.remove();
+      }
+
+      if (!char) {
+        status.textContent = "請輸入一個漢字";
+        return;
+      }
+
+      // 如果貼了多個字，提示並使用第一個
+      if ([...raw].length > 1) {
+        status.textContent = `偵測到多個字，已使用第一個字「${char}」查詢`;
+      }
+
+      const codes = codeMap.get(char);
+
+      // ===== 顯示 Unicode 資訊（無論有無編碼都顯示）=====
+      const codePoint = getCodePoint(char);
+      const unicodeHex = "U+" + codePoint.toString(16).toUpperCase();
+      const unicodeDec = codePoint;
+      const blockName = getUnicodeBlock(codePoint);
+
+      const unicodeInfo = document.createElement("div");
+      unicodeInfo.id = "unicodeInfo";
+      unicodeInfo.className = "unicode-info";
+      unicodeInfo.innerHTML = `
+        <div class="unicode-item">
+          <span class="label">所屬字元集</span>
+          <span class="value">${blockName}</span>
+        </div>
+        <div class="unicode-item">
+          <span class="label">Unicode</span>
+          <span class="value">${unicodeHex}</span>
+        </div>
+        <div class="unicode-item">
+          <span class="label">Decimal</span>
+          <span class="value">${unicodeDec}</span>
+        </div>
+      `;
+      charDisplay.after(unicodeInfo);
+
+      if (!codes || codes.length === 0) {
+        if (!status.textContent.includes("偵測到")) {
+          status.textContent = "";
+        }
+        charDisplay.textContent = char;
+        codeList.innerHTML = `<div class="not-found">查無此字的倉頡編碼</div>`;
+        resultEl.classList.add("show");
+        return;
+      }
+
+      if (!status.textContent.includes("偵測到")) {
+        status.textContent = `找到 ${codes.length} 組編碼`;
+      } else {
+        status.textContent += `，找到 ${codes.length} 組編碼`;
+      }
+
+      charDisplay.textContent = char;
+
+      // 依編碼長度排序（短的在前）
+      codes.sort((a, b) => a.length - b.length || a.localeCompare(b));
+
+      for (const code of codes) {
+        const item = document.createElement("div");
+        item.className = "code-item";
+        item.innerHTML = `
+          <div>
+            <div class="label">英文字母</div>
+            <div class="value">${code.toUpperCase()}</div>
+          </div>
+          <div>
+            <div class="label">倉頡字母</div>
+            <div class="value cangjie">${toCangjie(code)}</div>
+          </div>
+        `;
+        codeList.appendChild(item);
+      }
+
+      resultEl.classList.add("show");
+    }
+
+    // ===== 事件綁定 =====
+    const inputEl = document.getElementById("charInput");
+    let isComposing = false; // 是否正在輸入法組字中
+
+    // 開始組字
+    inputEl.addEventListener("compositionstart", () => {
+      isComposing = true;
+    });
+
+    // 結束組字
+    inputEl.addEventListener("compositionend", () => {
+      isComposing = false;
+      // 組字結束後再清理，確保只留一個漢字
+      forceSingleChar();
+    });
+
+    // 一般輸入事件
+    inputEl.addEventListener("input", () => {
+      // 正在組字時不要干預
+      if (isComposing) return;
+      forceSingleChar();
+    });
+
+    // 按 Enter 查詢
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        search();
+      }
+    });
+
+    document.getElementById("searchBtn").addEventListener("click", search);
+
+    // 頁面載入時讀取碼表
+    loadCodeTable();
+  </script>
+
+<script data-goatcounter="https://terryjiun.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+
+</body>
+</html>
