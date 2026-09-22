@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>輸入法查碼</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1 id="pageTitle">倉頡查碼</h1>
+  <p class="subtitle" id="pageSubtitle">支援 CJK 基本區 + Extension B～J</p>
+
+  <!-- 輸入法切換按鈕 -->
+  <div class="method-switcher" id="methodSwitcher">
+    <button type="button" data-method="cangjie" class="method-btn active">倉頡</button>
+    <button type="button" data-method="zhuyin" class="method-btn">注音</button>
+    <button type="button" data-method="dayi" class="method-btn">大易</button>
+    <button type="button" data-method="array" class="method-btn">行列</button>
+    <button type="button" data-method="boshiamy" class="method-btn">無蝦米</button>
+  </div>
+
+  <div class="card">
+    <div class="input-group">
+      <input type="text" id="charInput" placeholder="請輸入漢字" autocomplete="off">
+      <button id="searchBtn" disabled>查碼</button>
+    </div>
+
+    <div id="status" class="status">正在載入碼表...</div>
+
+    <div id="result" class="result">
+      <div class="char-display" id="charDisplay"></div>
+      <div class="code-list" id="codeList"></div>
+    </div>
+  </div>
+
+  <footer>資料來源依選擇的輸入法而定</footer>
+
+  <script src="app.js"></script>
+
+  <script data-goatcounter="https://terryjiun.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
