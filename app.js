@@ -1,7 +1,7 @@
 const BIG5_LABELS = {
-  "1": "Big5 常用字",
-  "2": "Big5 次常用字",
-  "3": "Big5 倚天造字區"
+  "1": "Big5-常用字",
+  "2": "Big5-次常用字",
+  "3": "Big5-倚天造字區"
 };
 
 let big5Map = new Map();
@@ -129,7 +129,7 @@ function getCodePoint(char) {
 }
 
 function getUnicodeBlock(codePoint) {
-  if (codePoint >= 0x4E00 && codePoint <= 0x9FFF) return "CJK URO(基本區)";
+  if (codePoint >= 0x4E00 && codePoint <= 0x9FFF) return "CJK URO (基本區)";
   if (codePoint >= 0x3400 && codePoint <= 0x4DBF) return "CJK Extension-A";
   if (codePoint >= 0x20000 && codePoint <= 0x2A6DF) return "CJK Extension-B";
   if (codePoint >= 0x2A700 && codePoint <= 0x2B73F) return "CJK Extension-C";
@@ -275,7 +275,7 @@ function search() {
   unicodeInfo.className = "unicode-info";
   unicodeInfo.innerHTML = `
     <div class="unicode-item">
-      <span class="label">所屬字元集</span>
+      <span class="label">Unicode Block</span>
       <span class="value">${blockName}</span>
     </div>
     <div class="unicode-item">
