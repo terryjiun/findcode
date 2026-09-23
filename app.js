@@ -1,23 +1,16 @@
-/* =========================================================
-   Big5 分類標籤
-   ========================================================= */
 const BIG5_LABELS = {
-  "1": "Big5常用字",
-  "2": "Big5次常用字",
-  "3": "Big5相容字"
+  "1": "Big5 常用字",
+  "2": "Big5 次常用字",
+  "3": "Big5 倚天造字區"
 };
 
-// 字元 → Big5 分類數字（1/2/3）
 let big5Map = new Map();
 
-/* =========================================================
-   各輸入法設定
-   ========================================================= */
 const METHODS = {
   cangjie: {
     id: "cangjie",
     name: "倉頡",
-    dataFile: "./Chajei.txt",
+    dataFile: "./Cangjie.txt",
     subtitle: "支援 CJK 基本區 + Extension A～J",
     codeLabel: "英文字母",
     radicalLabel: "倉頡字母",
@@ -35,7 +28,7 @@ const METHODS = {
     id: "zhuyin",
     name: "注音",
     dataFile: "./Zhuyin.txt",
-    subtitle: "支援 CJK 基本區 + Extension A～B",
+    subtitle: "支援 CJK 基本區 + Extension A～D",
     codeLabel: "英文字母",
     radicalLabel: "注音字母",
     radicalMap: {
@@ -97,20 +90,14 @@ const METHODS = {
     subtitle: "支援 CJK 基本區 + Extension A～D",
     codeLabel: "英文字母",
     radicalLabel: "無蝦米字母",
-    radicalMap: {}          // 無自訂對照表，直接顯示英文字母
+    radicalMap: {}          // 無自訂對照表
   }
 };
 
-/* =========================================================
-   全域狀態
-   ========================================================= */
 let currentMethod = "cangjie";
 let codeMap = new Map();
 let isComposing = false;
 
-/* =========================================================
-   工具函式
-   ========================================================= */
 function getConfig() {
   return METHODS[currentMethod];
 }
@@ -142,17 +129,17 @@ function getCodePoint(char) {
 }
 
 function getUnicodeBlock(codePoint) {
-  if (codePoint >= 0x4E00 && codePoint <= 0x9FFF) return "CJK 統一漢字（基本區）";
-  if (codePoint >= 0x3400 && codePoint <= 0x4DBF) return "CJK 統一漢字擴展 A";
-  if (codePoint >= 0x20000 && codePoint <= 0x2A6DF) return "CJK 統一漢字擴展 B";
-  if (codePoint >= 0x2A700 && codePoint <= 0x2B73F) return "CJK 統一漢字擴展 C";
-  if (codePoint >= 0x2B740 && codePoint <= 0x2B81F) return "CJK 統一漢字擴展 D";
-  if (codePoint >= 0x2B820 && codePoint <= 0x2CEAF) return "CJK 統一漢字擴展 E";
-  if (codePoint >= 0x2CEB0 && codePoint <= 0x2EBEF) return "CJK 統一漢字擴展 F";
-  if (codePoint >= 0x30000 && codePoint <= 0x3134F) return "CJK 統一漢字擴展 G";
-  if (codePoint >= 0x31350 && codePoint <= 0x323AF) return "CJK 統一漢字擴展 H";
-  if (codePoint >= 0x2EBF0 && codePoint <= 0x2EE5F) return "CJK 統一漢字擴展 I";
-  if (codePoint >= 0x323B0 && codePoint <= 0x3347F) return "CJK 統一漢字擴展 J";
+  if (codePoint >= 0x4E00 && codePoint <= 0x9FFF) return "CJK URO(基本區)";
+  if (codePoint >= 0x3400 && codePoint <= 0x4DBF) return "CJK Extension-A";
+  if (codePoint >= 0x20000 && codePoint <= 0x2A6DF) return "CJK Extension-B";
+  if (codePoint >= 0x2A700 && codePoint <= 0x2B73F) return "CJK Extension-C";
+  if (codePoint >= 0x2B740 && codePoint <= 0x2B81F) return "CJK Extension-D";
+  if (codePoint >= 0x2B820 && codePoint <= 0x2CEAF) return "CJK Extension-E";
+  if (codePoint >= 0x2CEB0 && codePoint <= 0x2EBEF) return "CJK Extension-F";
+  if (codePoint >= 0x30000 && codePoint <= 0x3134F) return "CJK Extension-G";
+  if (codePoint >= 0x31350 && codePoint <= 0x323AF) return "CJK Extension-H";
+  if (codePoint >= 0x2EBF0 && codePoint <= 0x2EE5F) return "CJK Extension-I";
+  if (codePoint >= 0x323B0 && codePoint <= 0x3347F) return "CJK Extension-J";
   if (codePoint >= 0xF900 && codePoint <= 0xFAFF) return "CJK 相容漢字";
   if (codePoint >= 0x2F800 && codePoint <= 0x2FA1F) return "CJK 相容漢字補充";
   return "其他字元集";
@@ -160,12 +147,17 @@ function getUnicodeBlock(codePoint) {
 
 function getBig5Category(char) {
   const category = big5Map.get(char);
-  return BIG5_LABELS[category] || "非Big5字元";
+  return BIG5_LABELS[category] || "非 Big5 字元";
 }
 
-/* =========================================================
-   載入 Big5 分類檔（只編 1、2、3）
-   ========================================================= */
+function updateFooterSource() {
+  const config = getConfig();
+  const fileName = config.dataFile.replace("./", "");
+  const url = `https://github.com/terryjiun/findcode/blob/main/${fileName}`;
+  const footer = document.getElementById("footerSource");
+  footer.innerHTML = `碼表來源：<a href="${url}" target="_blank" rel="noopener">${fileName}</a>`;
+}
+
 async function loadBig5Category() {
   try {
     const response = await fetch("./Big5Category.txt");
@@ -181,7 +173,7 @@ async function loadBig5Category() {
       const parts = trimmed.split(/\s+/);
       if (parts.length < 2) continue;
 
-      const category = parts[0]; // 只會是 1、2、3
+      const category = parts[0];
       const char = parts[1];
 
       if (category === "1" || category === "2" || category === "3") {
@@ -195,23 +187,21 @@ async function loadBig5Category() {
   }
 }
 
-/* =========================================================
-   載入輸入法碼表
-   ========================================================= */
 async function loadCodeTable() {
   const config = getConfig();
   const statusEl = document.getElementById("status");
   const searchBtn = document.getElementById("searchBtn");
 
   searchBtn.disabled = true;
-  statusEl.textContent = `正在載入「${config.name}」碼表...`;
+  statusEl.textContent = `正在載入「${config.name}」碼表，請靜待載入完成（約需3至30秒）...`;
   codeMap = new Map();
 
-  // 清除舊結果
-  document.getElementById("result").classList.remove("show");
+    document.getElementById("result").classList.remove("show");
   document.getElementById("codeList").innerHTML = "";
   const oldInfo = document.getElementById("unicodeInfo");
   if (oldInfo) oldInfo.remove();
+  
+  updateFooterSource();
 
   try {
     const response = await fetch(config.dataFile);
@@ -246,9 +236,6 @@ async function loadCodeTable() {
   }
 }
 
-/* =========================================================
-   查詢
-   ========================================================= */
 function search() {
   const config = getConfig();
   const input = document.getElementById("charInput");
@@ -262,8 +249,7 @@ function search() {
 
   codeList.innerHTML = "";
   resultEl.classList.remove("show");
-
-  // 清除舊的 Unicode 資訊
+  
   const oldUnicodeInfo = document.getElementById("unicodeInfo");
   if (oldUnicodeInfo) oldUnicodeInfo.remove();
 
@@ -273,12 +259,11 @@ function search() {
   }
 
   if ([...raw].length > 1) {
-    status.textContent = `偵測到多個字，已使用第一個字「${char}」查詢`;
+    status.textContent = `偵測到多個字元，已使用第一個字元「${char}」查詢`;
   }
 
   const codes = codeMap.get(char);
-
-  // ===== 顯示 Unicode + Big5 資訊 =====
+  
   const codePoint = getCodePoint(char);
   const unicodeHex = "U+" + codePoint.toString(16).toUpperCase();
   const unicodeDec = codePoint;
@@ -294,11 +279,11 @@ function search() {
       <span class="value">${blockName}</span>
     </div>
     <div class="unicode-item">
-      <span class="label">Unicode</span>
+      <span class="label">Unicode U+hex</span>
       <span class="value">${unicodeHex}</span>
     </div>
     <div class="unicode-item">
-      <span class="label">Decimal</span>
+      <span class="label">Unicode Decimal</span>
       <span class="value">${unicodeDec}</span>
     </div>
     <div class="unicode-item">
@@ -324,8 +309,7 @@ function search() {
   } else {
     status.textContent += `，找到 ${codes.length} 組編碼`;
   }
-
-  // 依編碼長度排序
+  
   codes.sort((a, b) => a.length - b.length || a.localeCompare(b));
 
   for (const code of codes) {
@@ -347,32 +331,23 @@ function search() {
   resultEl.classList.add("show");
 }
 
-/* =========================================================
-   切換輸入法
-   ========================================================= */
 function switchMethod(methodId) {
   if (!METHODS[methodId] || methodId === currentMethod) return;
 
   currentMethod = methodId;
   const config = getConfig();
-
-  // 更新標題與副標題
+  
   document.getElementById("pageTitle").textContent = config.name + "查碼";
   document.getElementById("pageSubtitle").textContent = config.subtitle;
   document.title = config.name + "查碼";
-
-  // 更新按鈕狀態
+  
   document.querySelectorAll(".method-btn").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.method === methodId);
   });
-
-  // 重新載入碼表
+  
   loadCodeTable();
 }
 
-/* =========================================================
-   事件綁定
-   ========================================================= */
 function initEvents() {
   const inputEl = document.getElementById("charInput");
 
@@ -404,11 +379,8 @@ function initEvents() {
   });
 }
 
-/* =========================================================
-   啟動
-   ========================================================= */
 document.addEventListener("DOMContentLoaded", async () => {
   initEvents();
-  await loadBig5Category();   // 先載入 Big5 分類
-  loadCodeTable();            // 再載入預設倉頡碼表
+  await loadBig5Category();
+  loadCodeTable();
 });
