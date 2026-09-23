@@ -1,10 +1,8 @@
 const BIG5_LABELS = {
-  "1": "Big5-常用字",
-  "2": "Big5-次常用字",
-  "3": "Big5-倚天造字區"
+  "1": "Big5 (常用字)",
+  "2": "Big5 (次常用字)",
+  "3": "Big5 (倚天造字區)"
 };
-
-let big5Map = new Map();
 
 const METHODS = {
   cangjie: {
@@ -90,24 +88,68 @@ const METHODS = {
     subtitle: "支援 CJK 基本區 + Extension A～D",
     codeLabel: "英文字母",
     radicalLabel: "無蝦米字母",
-    radicalMap: {}          // 無自訂對照表
+    radicalMap: {}
   }
 };
 
-let currentMethod = "cangjie";
+const INITIAL_UI = {
+  title: "輸入法查碼",
+  subtitle: "請選擇上方輸入法開始查碼",
+  status: "請點選上方輸入法以載入碼表",
+  placeholder: "請先選擇輸入法"
+};
+
+let big5Map = new Map();
+
+const codeTableCache = new Map();
+
+let currentMethod = null;
+
 let codeMap = new Map();
 let isComposing = false;
+let toastTimer = null;
 
 function getConfig() {
-  return METHODS[currentMethod];
+  return currentMethod ? METHODS[currentMethod] : null;
+}
+
+function applyMethodUI() {
+  const config = getConfig();
+  const titleEl = document.getElementById("pageTitle");
+  const subtitleEl = document.getElementById("pageSubtitle");
+  const inputEl = document.getElementById("charInput");
+  const searchBtn = document.getElementById("searchBtn");
+  const footer = document.getElementById("footerSource");
+
+  if (!config) {
+    titleEl.textContent = INITIAL_UI.title;
+    subtitleEl.textContent = INITIAL_UI.subtitle;
+    document.title = INITIAL_UI.title;
+    inputEl.placeholder = INITIAL_UI.placeholder;
+    inputEl.disabled = true;
+    searchBtn.disabled = true;
+    footer.innerHTML = "";
+  } else {
+    titleEl.textContent = config.name + "查碼";
+    subtitleEl.textContent = config.subtitle;
+    document.title = config.name + "查碼";
+    inputEl.placeholder = "請輸入一個字元";
+    updateFooterSource();
+  }
+
+  document.querySelectorAll(".method-btn").forEach((btn) => {
+    const isActive = btn.dataset.method === currentMethod;
+    btn.classList.toggle("active", isActive);
+    btn.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
 }
 
 function toRadical(code) {
-  const map = getConfig().radicalMap || {};
+  const map = getConfig()?.radicalMap || {};
   return code
     .toLowerCase()
     .split("")
-    .map(c => map[c] || c)
+    .map((c) => map[c] || c)
     .join("");
 }
 
@@ -129,33 +171,61 @@ function getCodePoint(char) {
 }
 
 function getUnicodeBlock(codePoint) {
-  if (codePoint >= 0x4E00 && codePoint <= 0x9FFF) return "CJK URO (基本區)";
-  if (codePoint >= 0x3400 && codePoint <= 0x4DBF) return "CJK Extension-A";
-  if (codePoint >= 0x20000 && codePoint <= 0x2A6DF) return "CJK Extension-B";
-  if (codePoint >= 0x2A700 && codePoint <= 0x2B73F) return "CJK Extension-C";
-  if (codePoint >= 0x2B740 && codePoint <= 0x2B81F) return "CJK Extension-D";
-  if (codePoint >= 0x2B820 && codePoint <= 0x2CEAF) return "CJK Extension-E";
-  if (codePoint >= 0x2CEB0 && codePoint <= 0x2EBEF) return "CJK Extension-F";
-  if (codePoint >= 0x30000 && codePoint <= 0x3134F) return "CJK Extension-G";
-  if (codePoint >= 0x31350 && codePoint <= 0x323AF) return "CJK Extension-H";
-  if (codePoint >= 0x2EBF0 && codePoint <= 0x2EE5F) return "CJK Extension-I";
-  if (codePoint >= 0x323B0 && codePoint <= 0x3347F) return "CJK Extension-J";
-  if (codePoint >= 0xF900 && codePoint <= 0xFAFF) return "CJK 相容漢字";
-  if (codePoint >= 0x2F800 && codePoint <= 0x2FA1F) return "CJK 相容漢字補充";
+  if (codePoint >= 0x4e00 && codePoint <= 0x9fff) return "CJK URO (基本區)";
+  if (codePoint >= 0x3400 && codePoint <= 0x4dbf) return "CJK Extension-A";
+  if (codePoint >= 0x20000 && codePoint <= 0x2a6df) return "CJK Extension-B";
+  if (codePoint >= 0x2a700 && codePoint <= 0x2b73f) return "CJK Extension-C";
+  if (codePoint >= 0x2b740 && codePoint <= 0x2b81f) return "CJK Extension-D";
+  if (codePoint >= 0x2b820 && codePoint <= 0x2ceaf) return "CJK Extension-E";
+  if (codePoint >= 0x2ceb0 && codePoint <= 0x2ebef) return "CJK Extension-F";
+  if (codePoint >= 0x30000 && codePoint <= 0x3134f) return "CJK Extension-G";
+  if (codePoint >= 0x31350 && codePoint <= 0x323af) return "CJK Extension-H";
+  if (codePoint >= 0x2ebf0 && codePoint <= 0x2ee5f) return "CJK Extension-I";
+  if (codePoint >= 0x323b0 && codePoint <= 0x3347f) return "CJK Extension-J";
+  if (codePoint >= 0xf900 && codePoint <= 0xfaff) return "CJK 相容漢字";
+  if (codePoint >= 0x2f800 && codePoint <= 0x2fa1f) return "CJK 相容漢字補充";
+  if (codePoint >= 0x3040 && codePoint <= 0x309f) return "平假名";
+  if (codePoint >= 0x30a0 && codePoint <= 0x30ff) return "片假名";
+  if (codePoint >= 0x31f0 && codePoint <= 0x31ff) return "片假名語音擴展";
+  if (codePoint >= 0xff00 && codePoint <= 0xffef) return "半形／全形形式";
+  if (codePoint >= 0x3000 && codePoint <= 0x303f) return "CJK 符號和標點";
   return "其他字元集";
 }
 
 function getBig5Category(char) {
   const category = big5Map.get(char);
-  return BIG5_LABELS[category] || "非 Big5 字元";
+  return BIG5_LABELS[category] || "不是 Big5 字元";
 }
 
 function updateFooterSource() {
   const config = getConfig();
+  const footer = document.getElementById("footerSource");
+  if (!config) {
+    footer.innerHTML = "";
+    return;
+  }
   const fileName = config.dataFile.replace("./", "");
   const url = `https://github.com/terryjiun/findcode/blob/main/${fileName}`;
-  const footer = document.getElementById("footerSource");
-  footer.innerHTML = `碼表來源：<a href="${url}" target="_blank" rel="noopener">${fileName}</a>`;
+  footer.innerHTML = `碼表來源：<a href="${url}" target="_blank" rel="noopener noreferrer">${fileName}</a>`;
+}
+
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.hidden = true;
+  }, 1800);
+}
+
+function clearResultUI() {
+  const resultEl = document.getElementById("result");
+  resultEl.hidden = true;
+  resultEl.classList.remove("show");
+  document.getElementById("codeList").innerHTML = "";
+  const oldInfo = document.getElementById("unicodeInfo");
+  if (oldInfo) oldInfo.remove();
 }
 
 async function loadBig5Category() {
@@ -187,57 +257,82 @@ async function loadBig5Category() {
   }
 }
 
+function parseCodeTable(text) {
+  const map = new Map();
+  const lines = text.split(/\r?\n/);
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("##")) continue;
+
+    const parts = trimmed.split(/\s+/);
+    if (parts.length < 2) continue;
+
+    const code = parts[0].toLowerCase();
+    const char = parts[1];
+
+    if (!map.has(char)) {
+      map.set(char, []);
+    }
+    const list = map.get(char);
+    if (!list.includes(code)) {
+      list.push(code);
+    }
+  }
+
+  return map;
+}
+
 async function loadCodeTable() {
   const config = getConfig();
+  if (!config) return;
+
   const statusEl = document.getElementById("status");
   const searchBtn = document.getElementById("searchBtn");
+  const inputEl = document.getElementById("charInput");
 
   searchBtn.disabled = true;
-  statusEl.textContent = `正在載入「${config.name}」碼表，請靜待載入完成（約需3至30秒）...`;
-  codeMap = new Map();
+  inputEl.disabled = true;
+  clearResultUI();
+  applyMethodUI();
 
-    document.getElementById("result").classList.remove("show");
-  document.getElementById("codeList").innerHTML = "";
-  const oldInfo = document.getElementById("unicodeInfo");
-  if (oldInfo) oldInfo.remove();
-  
-  updateFooterSource();
+  if (codeTableCache.has(currentMethod)) {
+    codeMap = codeTableCache.get(currentMethod);
+    statusEl.textContent = `「${config.name}」碼表載入完成（共 ${codeMap.size} 個字）`;
+    searchBtn.disabled = false;
+    inputEl.disabled = false;
+    inputEl.focus();
+    return;
+  }
+
+  statusEl.textContent = `正在載入「${config.name}」碼表，請稍候...`;
 
   try {
     const response = await fetch(config.dataFile);
     if (!response.ok) throw new Error(`無法載入 ${config.dataFile}`);
 
     const text = await response.text();
-    const lines = text.split(/\r?\n/);
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("##")) continue;
-
-      const parts = trimmed.split(/\s+/);
-      if (parts.length < 2) continue;
-
-      const code = parts[0].toLowerCase();
-      const char = parts[1];
-
-      if (!codeMap.has(char)) {
-        codeMap.set(char, []);
-      }
-      if (!codeMap.get(char).includes(code)) {
-        codeMap.get(char).push(code);
-      }
-    }
+    codeMap = parseCodeTable(text);
+    codeTableCache.set(currentMethod, codeMap);
 
     statusEl.textContent = `「${config.name}」碼表載入完成（共 ${codeMap.size} 個字）`;
     searchBtn.disabled = false;
+    inputEl.disabled = false;
+    inputEl.focus();
   } catch (err) {
-    statusEl.textContent = `載入失敗：${err.message}`;
+    statusEl.innerHTML = `載入失敗：${err.message} <button type="button" class="retry-btn" id="retryBtn">重試</button>`;
+    document.getElementById("retryBtn")?.addEventListener("click", () => loadCodeTable());
     console.error(err);
   }
 }
 
 function search() {
   const config = getConfig();
+  if (!config) {
+    document.getElementById("status").textContent = INITIAL_UI.status;
+    return;
+  }
+
   const input = document.getElementById("charInput");
   const raw = input.value.trim();
   const char = getFirstChar(raw);
@@ -247,23 +342,20 @@ function search() {
   const codeList = document.getElementById("codeList");
   const status = document.getElementById("status");
 
-  codeList.innerHTML = "";
-  resultEl.classList.remove("show");
-  
-  const oldUnicodeInfo = document.getElementById("unicodeInfo");
-  if (oldUnicodeInfo) oldUnicodeInfo.remove();
+  clearResultUI();
 
   if (!char) {
-    status.textContent = "請輸入一個漢字";
+    status.textContent = "請輸入一個字元";
     return;
   }
 
+  let statusMsg = "";
   if ([...raw].length > 1) {
-    status.textContent = `偵測到多個字元，已使用第一個字元「${char}」查詢`;
+    statusMsg = `偵測到多個字元，已使用第一個字元「${char}」查詢`;
   }
 
   const codes = codeMap.get(char);
-  
+
   const codePoint = getCodePoint(char);
   const unicodeHex = "U+" + codePoint.toString(16).toUpperCase();
   const unicodeDec = codePoint;
@@ -296,55 +388,72 @@ function search() {
   charDisplay.textContent = char;
 
   if (!codes || codes.length === 0) {
-    if (!status.textContent.includes("偵測到")) {
-      status.textContent = "";
-    }
+    status.textContent = statusMsg || "";
     codeList.innerHTML = `<div class="not-found">查無此字的${config.name}編碼</div>`;
+    resultEl.hidden = false;
     resultEl.classList.add("show");
     return;
   }
 
-  if (!status.textContent.includes("偵測到")) {
-    status.textContent = `找到 ${codes.length} 組編碼`;
+  if (statusMsg) {
+    status.textContent = `${statusMsg}，找到 ${codes.length} 組編碼`;
   } else {
-    status.textContent += `，找到 ${codes.length} 組編碼`;
+    status.textContent = `找到 ${codes.length} 組編碼`;
   }
-  
+
   codes.sort((a, b) => a.length - b.length || a.localeCompare(b));
+
+  const fragment = document.createDocumentFragment();
 
   for (const code of codes) {
     const item = document.createElement("div");
     item.className = "code-item";
+    item.tabIndex = 0;
+    item.setAttribute("role", "button");
+    item.setAttribute("aria-label", `複製編碼 ${code.toUpperCase()}`);
+    item.title = "點擊複製編碼";
+
+    const upper = code.toUpperCase();
+    const radical = toRadical(code);
+
     item.innerHTML = `
       <div>
         <div class="label">${config.codeLabel}</div>
-        <div class="value">${code.toUpperCase()}</div>
+        <div class="value">${upper}</div>
       </div>
       <div>
         <div class="label">${config.radicalLabel}</div>
-        <div class="value cangjie">${toRadical(code)}</div>
+        <div class="value radical">${radical}</div>
       </div>
     `;
-    codeList.appendChild(item);
+
+    const copyHandler = () => {
+      navigator.clipboard.writeText(upper).then(
+        () => showToast(`已複製：${upper}`),
+        () => showToast("複製失敗")
+      );
+    };
+    item.addEventListener("click", copyHandler);
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        copyHandler();
+      }
+    });
+
+    fragment.appendChild(item);
   }
 
+  codeList.appendChild(fragment);
+  resultEl.hidden = false;
   resultEl.classList.add("show");
 }
 
 function switchMethod(methodId) {
-  if (!METHODS[methodId] || methodId === currentMethod) return;
+  if (!METHODS[methodId]) return;
+  if (methodId === currentMethod) return;
 
   currentMethod = methodId;
-  const config = getConfig();
-  
-  document.getElementById("pageTitle").textContent = config.name + "查碼";
-  document.getElementById("pageSubtitle").textContent = config.subtitle;
-  document.title = config.name + "查碼";
-  
-  document.querySelectorAll(".method-btn").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.method === methodId);
-  });
-  
   loadCodeTable();
 }
 
@@ -373,14 +482,21 @@ function initEvents() {
 
   document.getElementById("methodSwitcher").addEventListener("click", (e) => {
     const btn = e.target.closest(".method-btn");
-    if (btn) {
-      switchMethod(btn.dataset.method);
+    if (btn) switchMethod(btn.dataset.method);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && document.activeElement !== inputEl && !e.ctrlKey && !e.metaKey) {
+      if (!inputEl.disabled) {
+        e.preventDefault();
+        inputEl.focus();
+      }
     }
   });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  applyMethodUI();
   initEvents();
-  await loadBig5Category();
-  loadCodeTable();
+  loadBig5Category();
 });
