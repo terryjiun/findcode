@@ -93,7 +93,7 @@ const METHODS = {
 };
 
 const INITIAL_UI = {
-  title: "輸入法查碼",
+  title: "泰瑞系列輸入法─線上查碼",
   subtitle: "請選擇上方輸入法開始查碼",
   status: "請點選上方輸入法以載入碼表",
   placeholder: "請先選擇輸入法"
