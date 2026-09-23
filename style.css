@@ -1,10 +1,37 @@
 :root {
   --primary: #2563eb;
-  --bg: #ccccff;
+  --primary-hover: #1d4ed8;
+  --bg: #e8e8ff;
   --card: #ffffff;
   --border: #e2e8f0;
   --text: #1e293b;
   --muted: #64748b;
+  --input-bg: #f0e6f6;
+  --item-bg: #f1f5f9;
+  --danger: #dc2626;
+  --disabled: #94a3b8;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+  --toast-bg: #1e293b;
+  --toast-text: #f8fafc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #3b82f6;
+    --primary-hover: #60a5fa;
+    --bg: #0f172a;
+    --card: #1e293b;
+    --border: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --input-bg: #334155;
+    --item-bg: #334155;
+    --danger: #f87171;
+    --disabled: #64748b;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    --toast-bg: #f1f5f9;
+    --toast-text: #0f172a;
+  }
 }
 
 * {
@@ -24,6 +51,18 @@ body {
   padding: 2rem 1rem;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 h1 {
   font-size: 1.75rem;
   margin-bottom: 0.5rem;
@@ -34,6 +73,7 @@ h1 {
   color: var(--muted);
   margin-bottom: 1.25rem;
   font-size: 0.95rem;
+  text-align: center;
 }
 
 .method-switcher {
@@ -45,17 +85,19 @@ h1 {
   max-width: 100%;
   overflow-x: auto;
   padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .method-btn {
-  padding: 0.45rem 0.9rem;
+  padding: 0.5rem 0.9rem;
+  min-height: 44px;
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--card);
   color: var(--text);
   border-radius: 999px;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -71,6 +113,11 @@ h1 {
   border-color: var(--primary);
 }
 
+.method-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -78,7 +125,7 @@ h1 {
   padding: 1.5rem;
   width: 100%;
   max-width: 480px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+  box-shadow: var(--shadow);
 }
 
 .input-group {
@@ -92,13 +139,15 @@ input[type="text"] {
   flex: 1;
   min-width: 0;
   padding: 0.7rem 0.9rem;
+  min-height: 44px;
   font-size: 1.15rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   text-align: center;
-  background: #f0e6f6;
+  background: var(--input-bg);
+  color: var(--text);
 }
 
 input[type="text"]:focus {
@@ -108,6 +157,7 @@ input[type="text"]:focus {
 
 button#searchBtn {
   padding: 0.7rem 1.2rem;
+  min-height: 44px;
   background: var(--primary);
   color: white;
   border: none;
@@ -120,13 +170,18 @@ button#searchBtn {
   flex-shrink: 0;
 }
 
-button#searchBtn:hover {
-  background: #1d4ed8;
+button#searchBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
 }
 
 button#searchBtn:disabled {
-  background: #94a3b8;
+  background: var(--disabled);
   cursor: not-allowed;
+}
+
+button#searchBtn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .status {
@@ -134,14 +189,34 @@ button#searchBtn:disabled {
   color: var(--muted);
   margin-bottom: 1rem;
   font-size: 0.9rem;
+  min-height: 1.4em;
+}
+
+.retry-btn {
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.retry-btn:hover {
+  background: var(--primary);
+  color: #fff;
 }
 
 .result {
   display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
 .result.show {
   display: block;
+  opacity: 1;
 }
 
 .char-display {
@@ -158,12 +233,29 @@ button#searchBtn:disabled {
 }
 
 .code-item {
-  background: #f1f5f9;
+  background: var(--item-bg);
   border-radius: 8px;
   padding: 0.9rem 1rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.1s;
+  border: 1px solid transparent;
+}
+
+.code-item:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgb(37 99 235 / 0.12);
+}
+
+.code-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.code-item:active {
+  transform: scale(0.98);
 }
 
 .label {
@@ -177,14 +269,14 @@ button#searchBtn:disabled {
   letter-spacing: 0.05em;
 }
 
-.value.cangjie {
+.value.radical {
   font-size: 1.35rem;
   letter-spacing: 0.15em;
 }
 
 .not-found {
   text-align: center;
-  color: #dc2626;
+  color: var(--danger);
   padding: 1rem;
 }
 
@@ -207,7 +299,7 @@ footer a:hover {
 }
 
 .unicode-info {
-  background: #f1f5f9;
+  background: var(--item-bg);
   border-radius: 8px;
   padding: 0.9rem 1rem;
   margin-bottom: 1rem;
@@ -220,11 +312,13 @@ footer a:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .unicode-item .label {
   font-size: 0.85rem;
   color: var(--muted);
+  flex-shrink: 0;
 }
 
 .unicode-item .value {
@@ -232,12 +326,46 @@ footer a:hover {
   font-weight: 600;
   font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
   letter-spacing: 0;
+  text-align: right;
+  word-break: break-all;
+}
+
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--toast-bg);
+  color: var(--toast-text);
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.2);
+  z-index: 100;
+  animation: toast-in 0.2s ease;
+}
+
+.toast[hidden] {
+  display: none;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 @media (max-width: 420px) {
   .method-btn {
     padding: 0.4rem 0.7rem;
     font-size: 0.82rem;
+    min-height: 40px;
   }
 
   input[type="text"] {
@@ -248,5 +376,9 @@ footer a:hover {
   button#searchBtn {
     padding: 0.65rem 1rem;
     font-size: 0.9rem;
+  }
+
+  .char-display {
+    font-size: 2.5rem;
   }
 }
