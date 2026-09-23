@@ -3,41 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="線上查詢倉頡、注音、大易、行列、無蝦米輸入法編碼，支援 CJK 與多種字元">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="color-scheme" content="light dark">
   <title>泰瑞系列輸入法─線上查碼</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1 id="pageTitle">倉頡查碼</h1>
-  <p class="subtitle" id="pageSubtitle">支援 CJK 基本區 + Extension A～J</p>
+  <h1 id="pageTitle">泰瑞系列輸入法─線上查碼</h1>
+  <p class="subtitle" id="pageSubtitle">請選擇上方輸入法開始查碼</p>
 
-  <!-- 輸入法切換按鈕 -->
-  <div class="method-switcher" id="methodSwitcher">
-    <button type="button" data-method="cangjie" class="method-btn active">倉頡</button>
-    <button type="button" data-method="zhuyin" class="method-btn">注音</button>
-    <button type="button" data-method="dayi" class="method-btn">大易</button>
-    <button type="button" data-method="array" class="method-btn">行列</button>
-    <button type="button" data-method="boshiamy" class="method-btn">無蝦米</button>
+  <div class="method-switcher" id="methodSwitcher" role="tablist" aria-label="選擇輸入法">
+    <button type="button" data-method="cangjie" class="method-btn" role="tab" aria-selected="false">倉頡</button>
+    <button type="button" data-method="zhuyin" class="method-btn" role="tab" aria-selected="false">注音</button>
+    <button type="button" data-method="dayi" class="method-btn" role="tab" aria-selected="false">大易</button>
+    <button type="button" data-method="array" class="method-btn" role="tab" aria-selected="false">行列</button>
+    <button type="button" data-method="boshiamy" class="method-btn" role="tab" aria-selected="false">無蝦米</button>
   </div>
 
   <div class="card">
     <div class="input-group">
-      <input type="text" id="charInput" placeholder="請輸入漢字" autocomplete="off">
-      <button id="searchBtn" disabled>查碼</button>
+      <label for="charInput" class="sr-only">輸入要查詢的字元</label>
+      <input type="text" id="charInput" placeholder="請先選擇輸入法" autocomplete="off" enterkeyhint="search" aria-describedby="status" disabled>
+      <button id="searchBtn" disabled aria-label="查詢編碼">查碼</button>
     </div>
 
-    <div id="status" class="status">正在載入碼表，請靜待載入完成（約需3至30秒）...</div>
+    <div id="status" class="status" role="status" aria-live="polite">請點選上方輸入法以載入碼表</div>
 
-    <div id="result" class="result">
+    <div id="result" class="result" hidden>
       <div class="char-display" id="charDisplay"></div>
       <div class="code-list" id="codeList"></div>
     </div>
   </div>
 
-  <footer id="footerSource">碼表來源載入中...</footer>
+  <footer id="footerSource"></footer>
 
-  <script src="app.js"></script>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="app.js" defer></script>
 
   <script data-goatcounter="https://terryjiun.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-  
+
 </body>
 </html>
