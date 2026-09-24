@@ -1,7 +1,7 @@
 const BIG5_LABELS = {
-  "1": "Big5 (常用字)",
-  "2": "Big5 (次常用字)",
-  "3": "Big5 (倚天造字區)"
+  "1": "Big5 常用字",
+  "2": "Big5 次常用字",
+  "3": "Big5 倚天造字區"
 };
 
 const METHODS = {
@@ -10,6 +10,7 @@ const METHODS = {
     name: "倉頡",
     dataFile: "./Cangjie.txt",
     subtitle: "支援 CJK 基本區 + Extension A～J",
+    note: "碼表主要來源為全字庫、倉頡之友論壇，泰瑞保證收錄以上字元集完整字數，但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "倉頡字母",
     radicalMap: {
@@ -26,7 +27,8 @@ const METHODS = {
     id: "zhuyin",
     name: "注音",
     dataFile: "./Zhuyin.txt",
-    subtitle: "支援 CJK 基本區 + Extension A～D",
+    subtitle: "支援 CJK 基本區 + Extension A～B",
+    note: "碼表主要來源為全字庫，泰瑞保證收錄以上字元集完整字數，但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "注音字母",
     radicalMap: {
@@ -48,6 +50,7 @@ const METHODS = {
     name: "大易",
     dataFile: "./Dayi.txt",
     subtitle: "支援 CJK 基本區 + Extension A",
+    note: "碼表主要來源為瑲珩，泰瑞保證收錄以上字元集完整字數，但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "大易字母",
     radicalMap: {
@@ -68,6 +71,7 @@ const METHODS = {
     name: "行列",
     dataFile: "./Array.txt",
     subtitle: "支援 CJK 基本區 + Extension A～D",
+    note: "碼表主要來源為行列輸入法的家，泰瑞保證收錄以上字元集完整字數，但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "行列字母",
     radicalMap: {
@@ -86,6 +90,7 @@ const METHODS = {
     name: "無蝦米",
     dataFile: "./Boshiamy.txt",
     subtitle: "支援 CJK 基本區 + Extension A～D",
+    note: "碼表主要來源為蝦米族樂園，泰瑞保證收錄以上字元集完整字數，但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "無蝦米字母",
     radicalMap: {}
@@ -93,9 +98,9 @@ const METHODS = {
 };
 
 const INITIAL_UI = {
-  title: "泰瑞系列輸入法─線上查碼",
-  subtitle: "請點選下方任一輸入法開始查碼",
-  status: "請點選上方任一輸入法以載入碼表",
+  title: "泰瑞系列中文輸入法─線上查碼",
+  subtitle: "請點選下方任一種輸入法開始查碼",
+  status: "請點選上方任一種輸入法以載入碼表",
   placeholder: "請先選擇輸入法"
 };
 
@@ -121,10 +126,17 @@ function applyMethodUI() {
   const searchBtn = document.getElementById("searchBtn");
   const footer = document.getElementById("footerSource");
 
+  const noteEl = document.getElementById("pageNote");
+
+  document.title = "泰瑞系列中文輸入法─線上查碼";
+
   if (!config) {
     titleEl.textContent = INITIAL_UI.title;
     subtitleEl.textContent = INITIAL_UI.subtitle;
-    document.title = INITIAL_UI.title;
+    if (noteEl) {
+      noteEl.textContent = "";
+      noteEl.hidden = true;
+    }
     inputEl.placeholder = INITIAL_UI.placeholder;
     inputEl.disabled = true;
     searchBtn.disabled = true;
@@ -132,7 +144,10 @@ function applyMethodUI() {
   } else {
     titleEl.textContent = config.name + "查碼";
     subtitleEl.textContent = config.subtitle;
-    document.title = config.name + "查碼";
+    if (noteEl) {
+      noteEl.textContent = config.note || "";
+      noteEl.hidden = !config.note;
+    }
     inputEl.placeholder = "請輸入一個字元";
     updateFooterSource();
   }
@@ -194,7 +209,7 @@ function getUnicodeBlock(codePoint) {
 
 function getBig5Category(char) {
   const category = big5Map.get(char);
-  return BIG5_LABELS[category] || "不是 Big5 字元";
+  return BIG5_LABELS[category] || "非 Big5 字元";
 }
 
 function updateFooterSource() {
