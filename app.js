@@ -98,8 +98,8 @@ const METHODS = {
 };
 
 const INITIAL_UI = {
-  title: "輸入法查碼",
-  subtitle: "請點選下方任一種輸入法開始查碼",
+  title: "輸入法查詢",
+  subtitle: "請點選下方任一種輸入法開始查詢",
   status: "請點選上方任一種輸入法以載入碼表",
   placeholder: "請先選擇輸入法"
 };
@@ -129,7 +129,7 @@ function applyMethodUI() {
 
   const noteEl = document.getElementById("pageNote");
 
-  document.title = "輸入法查碼";
+  document.title = "輸入法查詢";
 
   if (!config) {
     titleEl.textContent = INITIAL_UI.title;
@@ -143,7 +143,7 @@ function applyMethodUI() {
     searchBtn.disabled = true;
     footer.innerHTML = "";
   } else {
-    titleEl.textContent = config.name + "查碼";
+    titleEl.textContent = config.name + "查詢";
     subtitleEl.textContent = config.subtitle;
     if (noteEl) {
       noteEl.innerHTML = config.note || "";
@@ -217,6 +217,12 @@ function getUnicodeBlock(codePoint) {
 function getBig5Category(char) {
   const category = big5Map.get(char);
   return BIG5_LABELS[category] || "非 Big5 字元";
+}
+
+function getBig5Code(char) {
+  const category = big5Map.get(char);
+  if (category === "1" || category === "2" || category === "3") return category;
+  return "4";
 }
 
 function updateFooterSource() {
@@ -404,6 +410,9 @@ function searchByCode(code, config) {
     item.setAttribute("role", "button");
     item.setAttribute("aria-label", `複製字元 ${ch}`);
     item.title = "點擊複製字元";
+    const cp = ch.codePointAt(0);
+    const blockName = getUnicodeBlock(cp);
+    const big5Code = getBig5Code(ch);
     item.innerHTML = `
       <div>
         <div class="label">字元</div>
@@ -411,7 +420,15 @@ function searchByCode(code, config) {
       </div>
       <div>
         <div class="label">Unicode</div>
-        <div class="value">U+${ch.codePointAt(0).toString(16).toUpperCase()}</div>
+        <div class="value">U+${cp.toString(16).toUpperCase()}</div>
+      </div>
+      <div>
+        <div class="label">Block</div>
+        <div class="value reverse-meta">${blockName}</div>
+      </div>
+      <div>
+        <div class="label">Big5</div>
+        <div class="value reverse-meta">${big5Code}</div>
       </div>
     `;
     const copyHandler = () => {
