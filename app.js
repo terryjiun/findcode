@@ -219,11 +219,6 @@ function getBig5Category(char) {
   return BIG5_LABELS[category] || "非 Big5 字元";
 }
 
-function getBig5Code(char) {
-  const category = big5Map.get(char);
-  if (category === "1" || category === "2" || category === "3") return category;
-  return "4";
-}
 
 function updateFooterSource() {
   const config = getConfig();
@@ -412,7 +407,7 @@ function searchByCode(code, config) {
     item.title = "點擊複製字元";
     const cp = ch.codePointAt(0);
     const blockName = getUnicodeBlock(cp);
-    const big5Code = getBig5Code(ch);
+    const big5Category = getBig5Category(ch);
     item.innerHTML = `
       <div>
         <div class="label">字元</div>
@@ -427,8 +422,8 @@ function searchByCode(code, config) {
         <div class="value reverse-meta">${blockName}</div>
       </div>
       <div>
-        <div class="label">Big5</div>
-        <div class="value reverse-meta">${big5Code}</div>
+        <div class="label">Big5 分類</div>
+        <div class="value reverse-meta">${big5Category}</div>
       </div>
     `;
     const copyHandler = () => {
