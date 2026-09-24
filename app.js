@@ -134,7 +134,7 @@ function applyMethodUI() {
     titleEl.textContent = INITIAL_UI.title;
     subtitleEl.textContent = INITIAL_UI.subtitle;
     if (noteEl) {
-      noteEl.textContent = "";
+      noteEl.innerHTML = "";
       noteEl.hidden = true;
     }
     inputEl.placeholder = INITIAL_UI.placeholder;
@@ -145,7 +145,7 @@ function applyMethodUI() {
     titleEl.textContent = config.name + "查碼";
     subtitleEl.textContent = config.subtitle;
     if (noteEl) {
-      noteEl.textContent = config.note || "";
+      noteEl.innerHTML = config.note || "";
       noteEl.hidden = !config.note;
     }
     inputEl.placeholder = "請輸入一個字元";
