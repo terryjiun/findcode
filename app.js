@@ -221,7 +221,7 @@ function updateFooterSource() {
   }
   const fileName = config.dataFile.replace("./", "");
   const url = `https://github.com/terryjiun/findcode/blob/main/${fileName}`;
-  footer.innerHTML = `碼表來源（連結至GitHub，因檔案較大，可能導致瀏覽器卡頓）：<a href="${url}" target="_blank" rel="noopener noreferrer">${fileName}</a><br>（取自<a href="https://terryjiun.github.io/posts/Terry-mb-2016-1/" target="_blank">泰瑞系列中文輸入法對照表</a>）`;
+  footer.innerHTML = `碼表來源：<a href="${url}" target="_blank" rel="noopener noreferrer">${fileName}</a><br>（連結至GitHub，因檔案較大，可能導致瀏覽器卡頓）<br>（碼表取自<a href="https://terryjiun.github.io/posts/Terry-mb-2016-1/" target="_blank">泰瑞系列中文輸入法對照表</a>）`;
 }
 
 function showToast(message) {
