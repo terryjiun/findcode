@@ -111,6 +111,7 @@ const codeTableCache = new Map();
 let currentMethod = null;
 
 let codeMap = new Map();
+let reverseMap = new Map();
 let isComposing = false;
 let toastTimer = null;
 
@@ -148,7 +149,7 @@ function applyMethodUI() {
       noteEl.innerHTML = config.note || "";
       noteEl.hidden = !config.note;
     }
-    inputEl.placeholder = "請輸入一個字元";
+    inputEl.placeholder = "輸入字元查碼，或輸入編碼查字";
     updateFooterSource();
   }
 
@@ -173,8 +174,14 @@ function getFirstChar(str) {
   return chars.length > 0 ? chars[0] : "";
 }
 
+function looksLikeCode(str) {
+  if (!str) return false;
+  return /^[\x00-\x7F]+$/.test(str);
+}
+
 function forceSingleChar() {
   const inputEl = document.getElementById("charInput");
+  if (looksLikeCode(inputEl.value)) return;
   const chars = [...inputEl.value];
   if (chars.length > 1) {
     inputEl.value = chars[chars.length - 1];
@@ -273,7 +280,8 @@ async function loadBig5Category() {
 }
 
 function parseCodeTable(text) {
-  const map = new Map();
+  const codeMap = new Map();
+  const reverseMap = new Map();
   const lines = text.split(/\r?\n/);
 
   for (const line of lines) {
@@ -286,16 +294,24 @@ function parseCodeTable(text) {
     const code = parts[0].toLowerCase();
     const char = parts[1];
 
-    if (!map.has(char)) {
-      map.set(char, []);
+    if (!codeMap.has(char)) {
+      codeMap.set(char, []);
     }
-    const list = map.get(char);
-    if (!list.includes(code)) {
-      list.push(code);
+    const codeList = codeMap.get(char);
+    if (!codeList.includes(code)) {
+      codeList.push(code);
+    }
+
+    if (!reverseMap.has(code)) {
+      reverseMap.set(code, []);
+    }
+    const charList = reverseMap.get(code);
+    if (!charList.includes(char)) {
+      charList.push(char);
     }
   }
 
-  return map;
+  return { codeMap, reverseMap };
 }
 
 async function loadCodeTable() {
@@ -312,7 +328,9 @@ async function loadCodeTable() {
   applyMethodUI();
 
   if (codeTableCache.has(currentMethod)) {
-    codeMap = codeTableCache.get(currentMethod);
+    const cached = codeTableCache.get(currentMethod);
+    codeMap = cached.codeMap;
+    reverseMap = cached.reverseMap;
     statusEl.textContent = `「${config.name}」碼表載入完成（共 ${codeMap.size} 個字）`;
     searchBtn.disabled = false;
     inputEl.disabled = false;
@@ -327,8 +345,10 @@ async function loadCodeTable() {
     if (!response.ok) throw new Error(`無法載入 ${config.dataFile}`);
 
     const text = await response.text();
-    codeMap = parseCodeTable(text);
-    codeTableCache.set(currentMethod, codeMap);
+    const parsed = parseCodeTable(text);
+    codeMap = parsed.codeMap;
+    reverseMap = parsed.reverseMap;
+    codeTableCache.set(currentMethod, parsed);
 
     statusEl.textContent = `「${config.name}」碼表載入完成（共 ${codeMap.size} 個字）`;
     searchBtn.disabled = false;
@@ -341,6 +361,79 @@ async function loadCodeTable() {
   }
 }
 
+function searchByCode(code, config) {
+  const resultEl = document.getElementById("result");
+  const charDisplay = document.getElementById("charDisplay");
+  const codeList = document.getElementById("codeList");
+  const status = document.getElementById("status");
+
+  const chars = reverseMap.get(code) || [];
+
+  charDisplay.textContent = code.toUpperCase();
+
+  const unicodeInfo = document.createElement("div");
+  unicodeInfo.id = "unicodeInfo";
+  unicodeInfo.className = "unicode-info";
+  unicodeInfo.innerHTML = `
+    <div class="unicode-item">
+      <span class="label">${config.codeLabel}</span>
+      <span class="value">${code.toUpperCase()}</span>
+    </div>
+    <div class="unicode-item">
+      <span class="label">${config.radicalLabel}</span>
+      <span class="value radical">${toRadical(code)}</span>
+    </div>
+  `;
+  charDisplay.after(unicodeInfo);
+
+  if (chars.length === 0) {
+    status.textContent = "";
+    codeList.innerHTML = `<div class="not-found">查無編碼「${code.toUpperCase()}」對應的字</div>`;
+    resultEl.hidden = false;
+    resultEl.classList.add("show");
+    return;
+  }
+
+  status.textContent = `編碼 ${code.toUpperCase()} 共 ${chars.length} 個字`;
+
+  const fragment = document.createDocumentFragment();
+  for (const ch of chars) {
+    const item = document.createElement("div");
+    item.className = "code-item reverse-item";
+    item.tabIndex = 0;
+    item.setAttribute("role", "button");
+    item.setAttribute("aria-label", `複製字元 ${ch}`);
+    item.title = "點擊複製字元";
+    item.innerHTML = `
+      <div>
+        <div class="label">字元</div>
+        <div class="value reverse-char-value">${ch}</div>
+      </div>
+      <div>
+        <div class="label">Unicode</div>
+        <div class="value">U+${ch.codePointAt(0).toString(16).toUpperCase()}</div>
+      </div>
+    `;
+    const copyHandler = () => {
+      navigator.clipboard.writeText(ch).then(
+        () => showToast(`已複製：${ch}`),
+        () => showToast("複製失敗")
+      );
+    };
+    item.addEventListener("click", copyHandler);
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        copyHandler();
+      }
+    });
+    fragment.appendChild(item);
+  }
+  codeList.appendChild(fragment);
+  resultEl.hidden = false;
+  resultEl.classList.add("show");
+}
+
 function search() {
   const config = getConfig();
   if (!config) {
@@ -350,7 +443,6 @@ function search() {
 
   const input = document.getElementById("charInput");
   const raw = input.value.trim();
-  const char = getFirstChar(raw);
 
   const resultEl = document.getElementById("result");
   const charDisplay = document.getElementById("charDisplay");
@@ -359,10 +451,17 @@ function search() {
 
   clearResultUI();
 
-  if (!char) {
-    status.textContent = "請輸入一個字元";
+  if (!raw) {
+    status.textContent = "請輸入字元或編碼";
     return;
   }
+
+  if (looksLikeCode(raw)) {
+    searchByCode(raw.toLowerCase(), config);
+    return;
+  }
+
+  const char = getFirstChar(raw);
 
   let statusMsg = "";
   if ([...raw].length > 1) {
