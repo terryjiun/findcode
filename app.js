@@ -10,7 +10,7 @@ const METHODS = {
     name: "倉頡",
     dataFile: "./Cangjie.txt",
     subtitle: "支援 CJK 基本區 + Extension A～J 及部分日文假名及符號",
-    note: "碼表主要來源為全字庫、倉頡之友論壇，<br>保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
+    note: "碼表主要來源為<a href="https://www.cns11643.gov.tw/" target="_blank">全字庫</a>、<a href="https://www.chinesecj.com/forum/" target="_blank">倉頡之友論壇</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "倉頡字母",
     radicalMap: {
@@ -28,7 +28,7 @@ const METHODS = {
     name: "注音",
     dataFile: "./Zhuyin.txt",
     subtitle: "支援 CJK 基本區 + Extension A～B",
-    note: "碼表主要來源為全字庫，<br>保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
+    note: "碼表主要來源為<a href="https://www.cns11643.gov.tw/" target="_blank">全字庫</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則，<br>全字庫對於未知讀音的漢字一律將其注音標示為ㄇㄡˇ",
     codeLabel: "英文字母",
     radicalLabel: "注音字母",
     radicalMap: {
@@ -50,7 +50,7 @@ const METHODS = {
     name: "大易",
     dataFile: "./Dayi.txt",
     subtitle: "支援 CJK 基本區 + Extension A",
-    note: "碼表主要來源為瑲珩，<br>保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
+    note: "碼表主要來源為<a href="https://github.com/xrloong/qiangheng" target="_blank">瑲珩</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "大易字母",
     radicalMap: {
@@ -71,7 +71,7 @@ const METHODS = {
     name: "行列",
     dataFile: "./Array.txt",
     subtitle: "支援 CJK 基本區 + Extension A～D",
-    note: "碼表主要來源為行列輸入法的家，<br>保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
+    note: "碼表主要來源為<a href="https://www.array.com.tw/" target="_blank">行列輸入法的家</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "行列字母",
     radicalMap: {
@@ -90,7 +90,7 @@ const METHODS = {
     name: "無蝦米",
     dataFile: "./Boshiamy.txt",
     subtitle: "支援 CJK 基本區 + Extension A～D",
-    note: "碼表主要來源為蝦米族樂園，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
+    note: "碼表主要來源為<a href="https://vmliu.xyz/" target="_blank">蝦米族樂園</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "無蝦米字母",
     radicalMap: {}
@@ -221,7 +221,7 @@ function updateFooterSource() {
   }
   const fileName = config.dataFile.replace("./", "");
   const url = `https://github.com/terryjiun/findcode/blob/main/${fileName}`;
-  footer.innerHTML = `碼表來源：<a href="${url}" target="_blank" rel="noopener noreferrer">${fileName}</a>`;
+  footer.innerHTML = `碼表來源（連結至GitHub，因檔案較大，可能導致瀏覽器卡頓）：<a href="${url}" target="_blank" rel="noopener noreferrer">${fileName}</a><br>（取自<a href="https://terryjiun.github.io/posts/Terry-mb-2016-1/" target="_blank">泰瑞系列中文輸入法對照表</a>）`;
 }
 
 function showToast(message) {
