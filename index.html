@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="線上查詢倉頡、注音、大易、行列、無蝦米輸入法編碼，支援 CJK 與多種字元">
+  <meta name="description" content="倉頡、注音、大易、行列、無蝦米輸入法之拆碼與漢字互查，支援 CJK 各字元集">
   <meta name="theme-color" content="#2563eb">
   <meta name="color-scheme" content="light dark">
   <title>輸入法查詢</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1 id="pageTitle">輸入法查詢</h1>
+  <h1 id="pageTitle">輸入法查詢（漢字查拆碼／拆碼查漢字）</h1>
   <p class="subtitle" id="pageSubtitle">請點選下方任一種輸入法開始查詢</p>
   <p class="note" id="pageNote" hidden></p>
 
@@ -24,7 +24,7 @@
 
   <div class="card">
     <div class="input-group">
-      <label for="charInput" class="sr-only">請輸入要查詢的字元</label>
+      <label for="charInput" class="sr-only">請輸入要查詢的漢字或拆碼</label>
       <input type="text" id="charInput" placeholder="請先選擇輸入法" autocomplete="off" enterkeyhint="search" aria-describedby="status" disabled>
       <button id="searchBtn" disabled aria-label="查詢">查詢</button>
     </div>
