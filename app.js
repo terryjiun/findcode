@@ -10,7 +10,7 @@ const METHODS = {
     name: "倉頡",
     dataFile: "./Cangjie.txt",
     subtitle: "支援 CJK 基本區 + Extension A～J",
-    note: "碼表主要來源為全字庫、倉頡之友論壇，泰瑞保證收錄以上字元集完整字數，但是不保證每組編碼都符合公認的規則",
+    note: "碼表主要來源為全字庫、倉頡之友論壇，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "倉頡字母",
     radicalMap: {
@@ -28,7 +28,7 @@ const METHODS = {
     name: "注音",
     dataFile: "./Zhuyin.txt",
     subtitle: "支援 CJK 基本區 + Extension A～B",
-    note: "碼表主要來源為全字庫，泰瑞保證收錄以上字元集完整字數，但是不保證每組編碼都符合公認的規則",
+    note: "碼表主要來源為全字庫，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "注音字母",
     radicalMap: {
@@ -50,7 +50,7 @@ const METHODS = {
     name: "大易",
     dataFile: "./Dayi.txt",
     subtitle: "支援 CJK 基本區 + Extension A",
-    note: "碼表主要來源為瑲珩，泰瑞保證收錄以上字元集完整字數，但是不保證每組編碼都符合公認的規則",
+    note: "碼表主要來源為瑲珩，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "大易字母",
     radicalMap: {
@@ -71,7 +71,7 @@ const METHODS = {
     name: "行列",
     dataFile: "./Array.txt",
     subtitle: "支援 CJK 基本區 + Extension A～D",
-    note: "碼表主要來源為行列輸入法的家，泰瑞保證收錄以上字元集完整字數，但是不保證每組編碼都符合公認的規則",
+    note: "碼表主要來源為行列輸入法的家，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "行列字母",
     radicalMap: {
@@ -90,7 +90,7 @@ const METHODS = {
     name: "無蝦米",
     dataFile: "./Boshiamy.txt",
     subtitle: "支援 CJK 基本區 + Extension A～D",
-    note: "碼表主要來源為蝦米族樂園，泰瑞保證收錄以上字元集完整字數，但是不保證每組編碼都符合公認的規則",
+    note: "碼表主要來源為蝦米族樂園，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則",
     codeLabel: "英文字母",
     radicalLabel: "無蝦米字母",
     radicalMap: {}
