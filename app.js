@@ -1,7 +1,7 @@
 const BIG5_LABELS = {
   "1": "Big5 常用字",
   "2": "Big5 次常用字",
-  "3": "Big5 倚天造字區"
+  "3": "Big5 計量字及倚天擴充字"
 };
 
 const METHODS = {
@@ -9,7 +9,7 @@ const METHODS = {
     id: "cangjie",
     name: "倉頡",
     dataFile: "./Cangjie.txt",
-    subtitle: "支援 CJK 基本區 + Extension A～J 及部分日文假名及符號",
+    subtitle: "支援 CJK 基本區、擴充 A～J 區字元集及部分日文假名、符號",
     note: `碼表主要來源為<a href="https://www.cns11643.gov.tw/" target="_blank">全字庫</a>、<a href="https://www.chinesecj.com/forum/" target="_blank">倉頡之友論壇</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則`,
     codeLabel: "英文字母",
     radicalLabel: "倉頡字母",
@@ -27,8 +27,8 @@ const METHODS = {
     id: "zhuyin",
     name: "注音",
     dataFile: "./Zhuyin.txt",
-    subtitle: "支援 CJK 基本區 + Extension A～B",
-    note: `碼表主要來源為<a href="https://www.cns11643.gov.tw/" target="_blank">全字庫</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則，<br>全字庫對於未知讀音的漢字一律將其注音標示為ㄇㄡˇ`,
+    subtitle: "支援 CJK 基本區、擴充 A～B 區字元集",
+    note: `碼表主要來源為<a href="https://www.cns11643.gov.tw/" target="_blank">全字庫</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則<br>（注意！全字庫對於未知讀音的漢字一律將其注音標示為ㄇㄡˇ）`,
     codeLabel: "英文字母",
     radicalLabel: "注音字母",
     radicalMap: {
@@ -49,7 +49,7 @@ const METHODS = {
     id: "dayi",
     name: "大易",
     dataFile: "./Dayi.txt",
-    subtitle: "支援 CJK 基本區 + Extension A",
+    subtitle: "支援 CJK 基本區、擴充 A 區字元集",
     note: `碼表主要來源為<a href="https://github.com/xrloong/qiangheng" target="_blank">瑲珩</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則`,
     codeLabel: "英文字母",
     radicalLabel: "大易字母",
@@ -70,7 +70,7 @@ const METHODS = {
     id: "array",
     name: "行列",
     dataFile: "./Array.txt",
-    subtitle: "支援 CJK 基本區 + Extension A～D",
+    subtitle: "支援 CJK 基本區、擴充 A～D 區字元集",
     note: `碼表主要來源為<a href="https://www.array.com.tw/" target="_blank">行列輸入法的家</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則`,
     codeLabel: "英文字母",
     radicalLabel: "行列字母",
@@ -89,8 +89,8 @@ const METHODS = {
     id: "boshiamy",
     name: "無蝦米",
     dataFile: "./Boshiamy.txt",
-    subtitle: "支援 CJK 基本區 + Extension A～D",
-    note: `碼表主要來源為<a href="https://vmliu.xyz/" target="_blank">蝦米族樂園</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則`,
+    subtitle: "支援 CJK 基本區、擴充 A～D 區字元集",
+    note: `碼表主要來源為舊版<a href="https://vmliu.xyz/" target="_blank">蝦米族樂園</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則`,
     codeLabel: "英文字母",
     radicalLabel: "無蝦米字母",
     radicalMap: {}
@@ -98,7 +98,7 @@ const METHODS = {
 };
 
 const INITIAL_UI = {
-  title: "輸入法查詢",
+  title: "輸入法查詢（漢字查拆碼／拆碼查漢字）",
   subtitle: "請點選下方任一種輸入法開始查詢",
   status: "請點選上方任一種輸入法以載入碼表",
   placeholder: "請先選擇輸入法"
@@ -149,7 +149,7 @@ function applyMethodUI() {
       noteEl.innerHTML = config.note || "";
       noteEl.hidden = !config.note;
     }
-    inputEl.placeholder = "輸入字元查碼，或輸入編碼查字";
+    inputEl.placeholder = "請輸入要查詢的漢字或拆碼";
     updateFooterSource();
   }
 
@@ -229,7 +229,7 @@ function updateFooterSource() {
   }
   const fileName = config.dataFile.replace("./", "");
   const url = `https://github.com/terryjiun/findcode/blob/main/${fileName}`;
-  footer.innerHTML = `碼表來源：<a href="${url}" target="_blank" rel="noopener noreferrer">${fileName}</a><br>（連結至GitHub，因檔案較大，可能導致瀏覽器卡頓）<br>（碼表取自<a href="https://terryjiun.github.io/posts/Terry-mb-2016-1/" target="_blank">泰瑞系列中文輸入法對照表</a>）`;
+  footer.innerHTML = `碼表檔案：<a href="${url}" target="_blank" rel="noopener noreferrer">${fileName}</a><br>（點選此連結後可能會因檔案較大而導致瀏覽器卡頓）<br>（碼表取自<a href="https://terryjiun.github.io/posts/Terry-mb-2016-1/" target="_blank">泰瑞系列中文輸入法對照表</a>）`;
 }
 
 function showToast(message) {
