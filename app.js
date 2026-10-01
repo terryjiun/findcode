@@ -27,8 +27,8 @@ const METHODS = {
     id: "zhuyin",
     name: "注音",
     dataFile: "./Zhuyin.txt",
-    subtitle: "支援 CJK 基本區、擴充 A～B 區字元集",
-    note: `碼表主要來源為<a href="https://www.cns11643.gov.tw/" target="_blank">全字庫</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則<br>（注意！全字庫對於未知讀音的漢字一律將其注音標示為ㄇㄡˇ）`,
+    subtitle: "支援 CJK 基本區、擴充 A～D 區字元集",
+    note: `碼表主要來源為<a href="https://www.cns11643.gov.tw/" target="_blank">全字庫</a>，<br>泰瑞保證收錄以上字元集完整字數，<br>但是不保證每組編碼都符合公認的規則<br>（注意！全字庫對於未知讀音的漢字一律將其注音標示為ㄇㄡˇ，<br>泰瑞補字時對於未知讀音的漢字一律將其注音標示為ㄅㄧㄤˋ）`,
     codeLabel: "英文字母",
     radicalLabel: "注音字母",
     radicalMap: {
