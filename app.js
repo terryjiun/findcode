@@ -98,7 +98,7 @@ const METHODS = {
 };
 
 const INITIAL_UI = {
-  title: "泰瑞輸入法查碼與查字（漢字查拆碼／拆碼查漢字）",
+  title: "泰瑞輸入法查碼與查字",
   subtitle: "請點選下方任一種輸入法開始查詢",
   status: "請點選上方任一種輸入法以載入碼表",
   placeholder: "請先選擇輸入法"
