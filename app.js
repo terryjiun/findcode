@@ -240,7 +240,7 @@ function updateFooterSource() {
   }
   const fileName = config.dataFile.replace("./", "");
   const url = `https://github.com/terryjiun/findcode/blob/main/${fileName}`;
-  footer.innerHTML = `碼表檔案：<a href="${url}" target="_blank" rel="noopener noreferrer">${fileName}</a><br>（點選此連結後可能會因檔案較大而導致瀏覽器卡頓）<br>（碼表取自<a href="https://terryjiun.github.io/posts/findcode/" target="_blank">泰瑞系列中文輸入法對照表</a>）<br>注意！以漢字查詢請輸入單一字元<br>以拆碼查詢請輸入對應鍵盤的英數及符號<br>（請勿輸入注音符號或字根名稱）`;
+  footer.innerHTML = `<br>以漢字查詢拆碼請輸入單一字元<br>以拆碼查詢漢字請輸入對應鍵盤的英數及符號<br>（請勿輸入注音符號或字根名稱）<br>　<br>碼表檔案：<a href="${url}" target="_blank" rel="noopener noreferrer">${fileName}</a><br>（點選此連結後可能會因檔案較大而導致瀏覽器卡頓）<br>（碼表取自<a href="https://terryjiun.github.io/posts/findcode/" target="_blank">泰瑞系列中文輸入法對照表</a>）`;
 }
 
 function showToast(message) {
