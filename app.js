@@ -343,7 +343,7 @@ async function loadCodeTable() {
     const cached = codeTableCache.get(currentMethod);
     codeMap = cached.codeMap;
     reverseMap = cached.reverseMap;
-    statusEl.textContent = `「${config.name}」碼表載入完成（共 ${codeMap.size} 個字）`;
+    statusEl.textContent = `「${config.name}」碼表載入完成（共 ${codeMap.size} 個字）<br>以漢字查詢請輸入單一字元<br>以拆碼查詢請輸入對應鍵盤的英數及符號<br>（請勿輸入注音符號或字根名稱）`;
     searchBtn.disabled = false;
     inputEl.disabled = false;
     inputEl.focus();
